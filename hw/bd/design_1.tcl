@@ -1,6 +1,6 @@
 
 ################################################################
-# This is a generated script based on design: design_1
+# This is a generated script based on design: skid_testing
 #
 # Though there are limitations about the generated script,
 # the main purpose of this utility is to make learning
@@ -35,7 +35,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 ################################################################
 
 # To test this script, run the following commands from Vivado Tcl console:
-# source design_1_script.tcl
+# source skid_testing_script.tcl
 
 set bCheckIPsPassed 1
 ##################################################################
@@ -45,6 +45,7 @@ set bCheckIPs 1
 if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
 user.org:user:skidbuffer:1.0\
+xilinx.com:ip:system_ila:1.1\
 xilinx.com:ip:axi_dma:7.1\
 xilinx.com:ip:smartconnect:1.0\
 xilinx.com:ip:processing_system7:5.5\
@@ -1015,18 +1016,45 @@ proc create_root_design { parentCell } {
    CONFIG.DW {32} \
  ] $skidbuffer_0
 
+  # Create instance: system_ila_0, and set properties
+  set system_ila_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:system_ila:1.1 system_ila_0 ]
+  set_property -dict [ list \
+   CONFIG.C_BRAM_CNT {1} \
+   CONFIG.C_MON_TYPE {MIX} \
+   CONFIG.C_NUM_MONITOR_SLOTS {2} \
+   CONFIG.C_PROBE0_WIDTH {2} \
+   CONFIG.C_PROBE_WIDTH_PROPAGATION {MANUAL} \
+   CONFIG.C_SLOT_0_APC_EN {0} \
+   CONFIG.C_SLOT_0_AXI_DATA_SEL {1} \
+   CONFIG.C_SLOT_0_AXI_TRIG_SEL {1} \
+   CONFIG.C_SLOT_0_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0} \
+   CONFIG.C_SLOT_1_APC_EN {0} \
+   CONFIG.C_SLOT_1_AXI_DATA_SEL {1} \
+   CONFIG.C_SLOT_1_AXI_TRIG_SEL {1} \
+   CONFIG.C_SLOT_1_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0} \
+ ] $system_ila_0
+
   # Create instance: zynq
   create_hier_cell_zynq [current_bd_instance .] zynq
 
   # Create interface connections
   connect_bd_intf_net -intf_net skidbuffer_0_m [get_bd_intf_pins skidbuffer_0/m] [get_bd_intf_pins zynq/S_AXIS_DMA]
+connect_bd_intf_net -intf_net [get_bd_intf_nets skidbuffer_0_m] [get_bd_intf_pins system_ila_0/SLOT_1_AXIS] [get_bd_intf_pins zynq/S_AXIS_DMA]
+  set_property -dict [ list \
+HDL_ATTRIBUTE.DEBUG {true} \
+ ] [get_bd_intf_nets skidbuffer_0_m]
   connect_bd_intf_net -intf_net zynq_DDR [get_bd_intf_ports DDR] [get_bd_intf_pins zynq/DDR]
   connect_bd_intf_net -intf_net zynq_FIXED_IO [get_bd_intf_ports FIXED_IO] [get_bd_intf_pins zynq/FIXED_IO]
   connect_bd_intf_net -intf_net zynq_M_AXIS_DMA [get_bd_intf_pins skidbuffer_0/s] [get_bd_intf_pins zynq/M_AXIS_DMA]
+connect_bd_intf_net -intf_net [get_bd_intf_nets zynq_M_AXIS_DMA] [get_bd_intf_pins system_ila_0/SLOT_0_AXIS] [get_bd_intf_pins zynq/M_AXIS_DMA]
+  set_property -dict [ list \
+HDL_ATTRIBUTE.DEBUG {true} \
+ ] [get_bd_intf_nets zynq_M_AXIS_DMA]
 
   # Create port connections
-  connect_bd_net -net zynq_clock [get_bd_pins skidbuffer_0/clock] [get_bd_pins zynq/clock]
-  connect_bd_net -net zynq_reset_n [get_bd_pins skidbuffer_0/reset_n] [get_bd_pins zynq/reset_n]
+  connect_bd_net -net zynq_clock [get_bd_pins skidbuffer_0/clock] [get_bd_pins system_ila_0/clk] [get_bd_pins zynq/clock]
+  connect_bd_net -net zynq_irq [get_bd_pins system_ila_0/probe0] [get_bd_pins zynq/irq]
+  connect_bd_net -net zynq_reset_n [get_bd_pins skidbuffer_0/reset_n] [get_bd_pins system_ila_0/resetn] [get_bd_pins zynq/reset_n]
 
   # Create address segments
   create_bd_addr_seg -range 0x20000000 -offset 0x00000000 [get_bd_addr_spaces zynq/axi_dma_0/Data_MM2S] [get_bd_addr_segs zynq/processing_system7_0/S_AXI_HP0/HP0_DDR_LOWOCM] SEG_processing_system7_0_HP0_DDR_LOWOCM

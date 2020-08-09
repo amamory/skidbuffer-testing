@@ -151,7 +151,7 @@ int main(){
 
 	xil_printf("Checking data ... ");
 	Xil_DCacheInvalidateRange((UINTPTR)hermes_pkg_in, PACKET_SIZE*sizeof(int));
-	/*
+
 	if (memcmp(hermes_pkg,hermes_pkg_in,PACKET_SIZE*sizeof(int))==0){
 		xil_printf("packets matched !!!\n");
 	}else{
@@ -161,7 +161,7 @@ int main(){
 		}
 	}
 	xil_printf("--- Exiting main() --- \r\n");
-	*/
+	/*
 	// checking the header
 	int cmp=1;
 	cmp &=  hermes_pkg[0] == hermes_pkg_in[2] ?  1 : 0;
@@ -179,7 +179,7 @@ int main(){
 			xil_printf("sent [%x] and received [%x]\n", hermes_pkg[i],hermes_pkg_in[i]);
 		}
 	}
-
+	*/
 	return XST_SUCCESS;
 
 }
