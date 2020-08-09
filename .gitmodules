@@ -1,0 +1,3 @@
+[submodule "hw/ips/axis-skidbuffer"]
+	path = hw/ips/axis-skidbuffer
+	url = https://github.com/amamory/axis-skidbuffer.git
