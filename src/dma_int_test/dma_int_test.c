@@ -11,8 +11,8 @@
 
 //#include "platform.h"
 
-// Hermes packet size, including the flits for header and size
-#define PACKET_SIZE 6
+// the size of the data burst
+#define PACKET_SIZE 400
 
 // PS is receiving from the device
 #define RX_INTR_ID		XPAR_FABRIC_ZYNQ_AXI_DMA_0_MM2S_INTROUT_INTR
@@ -27,10 +27,8 @@ XScuGic IntcInstance;
 XAxiDma myDma;
 
 // data buffers
-//u32 hermes_pkg[] = {0x00000101,0x0002,0x0001,0x0002};
-u32 hermes_pkg[] = {0x00000001, 0x00000004, 0x00000000, 0x44444444, 0x55555555, 0x66666666};
-
-u32 hermes_pkg_in[10] = {0};
+u32 hermes_pkg[PACKET_SIZE];
+u32 hermes_pkg_in[PACKET_SIZE];
 
 // Flags interrupt handlers use to notify the application context the events.
 volatile int TxDone;
@@ -102,16 +100,12 @@ int main(){
 	XAxiDma_IntrEnable(&myDma, XAXIDMA_IRQ_IOC_MASK, XAXIDMA_DEVICE_TO_DMA);
 
 	// =======================================
-	// Running DMA self test
+	// fill vector with data
 	// =======================================
-	/*
-	status = XAxiDma_Selftest(&myDma);
-	if (status != XST_SUCCESS) {
-		xil_printf("Self-test failed !\r\n");
-		return XST_FAILURE;
+	for (int i = 0; i < PACKET_SIZE;i++){
+		hermes_pkg[i] = i;
 	}
-	xil_printf("Self-test passed !!!\r\n");
-	 */
+
 	// =======================================
 	// Send data
 	// =======================================
@@ -151,7 +145,7 @@ int main(){
 
 	xil_printf("Checking data ... ");
 	Xil_DCacheInvalidateRange((UINTPTR)hermes_pkg_in, PACKET_SIZE*sizeof(int));
-
+	/*
 	if (memcmp(hermes_pkg,hermes_pkg_in,PACKET_SIZE*sizeof(int))==0){
 		xil_printf("packets matched !!!\n");
 	}else{
@@ -161,25 +155,23 @@ int main(){
 		}
 	}
 	xil_printf("--- Exiting main() --- \r\n");
-	/*
+	*/
+
 	// checking the header
 	int cmp=1;
-	cmp &=  hermes_pkg[0] == hermes_pkg_in[2] ?  1 : 0;
-	cmp &=  hermes_pkg[1] == hermes_pkg_in[1] ?  1 : 0;
-	cmp &=  hermes_pkg[2] == hermes_pkg_in[0] ?  1 : 0;
-	// cheking the payload
-	for (int i =3; i<PACKET_SIZE; i++){
-		cmp &=  (hermes_pkg[i]+1) == hermes_pkg_in[i] ?  1 : 0;
+	// checking the payload
+	for (int i =0; i<PACKET_SIZE; i++){
+		cmp &=  (hermes_pkg_in[i]) == i ?  1 : 0;
 	}
 	if (cmp==1){
 		xil_printf("packets matched !!!\n");
 	}else{
 		xil_printf("packets do not matched !!!\n");
 		for (int i =0; i<PACKET_SIZE; i++){
-			xil_printf("sent [%x] and received [%x]\n", hermes_pkg[i],hermes_pkg_in[i]);
+			xil_printf("[%x] x [%x]\n", hermes_pkg[i],hermes_pkg_in[i]);
 		}
 	}
-	*/
+
 	return XST_SUCCESS;
 
 }
