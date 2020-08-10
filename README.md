@@ -1,32 +1,36 @@
-# Vivado MODULE NAME
+# Vivado Tester for skidbuffer LFSR
 
-This repo contains scripts to recreate **DESCRIBE THE MODULE HERE**. The project is setup for Zedboard, although it would be easy to change to other boards assuming you have some basic TCL skills.
+Skidbuffer with LFSR is a design that inserts pseudo random timing interruptions in a AXI streaming data flow. This is usefull test the AXIS interfaces of new blocks. 
+This repo is a project demonstrating how skidbuffer LFSR in a Zynq DMA transfer.
+The project is setup for Zedboard, although it would be easy to change to other boards assuming you have some basic TCL skills.
 
 # Module/IP design
 
-Describe here your module interface and protocols.
+Here is an example were 400 intergers are sent via DMA. Normally you dont see any contention.
 
-![Place here a nice picture of your design](my-awesome-module.png)
+![continuous waveform](wave-continuous.png)
 
-# How to use this repository
+However, without contention it is not possible to really test an AXIS interface. 
+Skidbuffer + LFSR inserts these short contentions in the dataflow, testing the interface protocol of a block with AXIS. This is what happens to the same data transfer after Skidbuffer + LFSR  block.
 
-These scripts presented here are quite reusable if you keep the same dir structure. It should be useful for other Vivado/SDK projects with minor efforts. For this reason this repository is a template. Just click in **Use this Template** button to replicate it for your own project.
+![waveform with random interruptions](wave-messy-timing.png)
 
-In command line, create an empty repository called *<your-reponame>* in github and follow these steps to use it as a template:
+# How to download it
+
+This repository might have custom IPs included as git submodules. Thus, the following command is required to download all its dependencies.
 
 ```
-mkdir <my-new-project>
-cd <my-new-project>
-git clone https://github.com/amamory/vivado-base-project.git .
-rm -rf .git
-git init
-git remote set-url origin https://github.com/<your-username>/<your-reponame>
-git add * .gitignore
-git commit -m "my initial commit"
-git push origin master
+git clone --recursive https://github.com/amamory/<repo-name>.git
 ```
 
-Each directory has instructions related to the kind of file you have to place in them.
+If you already cloned the repository without `--recursive`, then run the following command to download all the submodules.
+
+```
+git submodule update --init --recursive
+```
+
+Refer to this [tutorial](https://www.vogella.com/tutorials/GitSubmodules/article.html) to learn how to manage submodules.
+
 
 # How to run it
 
